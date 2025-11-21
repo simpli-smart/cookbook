@@ -18,13 +18,13 @@ SIMPLISMART_API_KEY = os.getenv("SIMPLISMART_API_KEY")
 
 # Set page config
 st.set_page_config(
-    page_title="Flux Kontext Image Generator",
+    page_title="Flux.1 Kontext Dev Image Editor",
     page_icon="🎨",
     layout="wide"
 )
 
 # Add logo to header using custom CSS
-logo_path = Path("logo.png")
+logo_path = Path("assets/logo.png")
 if logo_path.exists():
     logo_base64 = base64.b64encode(logo_path.read_bytes()).decode()
     st.markdown(
@@ -60,6 +60,26 @@ if logo_path.exists():
             max-height: 100%;
             object-fit: contain;
         }}
+        
+        /* Custom styling for cleaner look */
+        .stTextArea label, .stFileUploader label {{
+            font-size: 16px !important;
+            font-weight: 500 !important;
+        }}
+        
+        /* Image container with border */
+        .image-container {{
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 10px 0;
+        }}
+        
+        /* Hide help icons for cleaner look */
+        .stTooltipIcon {{
+            visibility: hidden;
+        }}
         </style>
         <div class="logo-container">
             <img src="data:image/png;base64,{logo_base64}" style="width: 100%; height: 100%; object-fit: contain;">
@@ -93,52 +113,58 @@ def make_request(payload, retries=3, delay=2):
                 raise e
 
 # App Title
-st.title("🎨 Flux.1 Kontext Image Generator")
-st.markdown("Generate creative images by combining a reference image with your prompt")
+st.title("🎨 Flux.1 Kontext Dev Image Editor")
+st.markdown("")
 
-# Create two columns for layout
-col1, col2 = st.columns([1, 1])
+# Create 3-column layout
+col_left, col_middle, col_right = st.columns([1, 1, 1])
 
-with col1:
-    # st.header("Input")
-    
-    # Image input method selection
+# Initialize session state for generated image
+if 'generated_image_url' not in st.session_state:
+    st.session_state.generated_image_url = None
+if 'generation_metrics' not in st.session_state:
+    st.session_state.generation_metrics = None
+
+# LEFT COLUMN - Controls
+with col_left:
+    st.markdown("### 📸 Input Image")
     input_method = st.radio(
-        "Choose image input method:",
-        ["Upload Image", "Capture from Webcam"],
-        horizontal=True
+        "",
+        ["📤 Upload", "📷 Webcam"],
+        horizontal=True,
+        label_visibility="collapsed"
     )
     
     image = None
     
-    if input_method == "Upload Image":
+    if input_method == "📤 Upload":
         uploaded_file = st.file_uploader(
-            "Upload an image",
+            "Upload",
             type=["jpg", "jpeg", "png"],
-            help="Upload a reference image to use in generation"
+            label_visibility="collapsed"
         )
         if uploaded_file is not None:
             image = Image.open(uploaded_file)
-            st.image(image, caption="Uploaded Image", use_container_width=True)
     
     else:  # Webcam
-        camera_photo = st.camera_input("Take a picture")
+        camera_photo = st.camera_input("Capture", label_visibility="collapsed")
         if camera_photo is not None:
             image = Image.open(camera_photo)
-            st.image(image, caption="Captured Image", use_container_width=True)
     
     # Prompt input
+    st.markdown("### ✍️ Your Prompt")
     prompt = st.text_area(
-        "Enter your prompt:",
-        value="Change the background to the Golden Gate bridge",
-        height=100,
-        help="Describe what you want to generate with the reference image"
+        "Prompt",
+        value="Change the background to the Golden Gate Bridge",
+        height=80,
+        label_visibility="collapsed",
+        placeholder="Describe what you want to generate..."
     )
     
     # Advanced settings in expander
-    with st.expander("⚙️ Advanced Settings"):
+    with st.expander("⚙️ Settings"):
         guidance_scale = st.slider(
-            "Guidance Scale",
+            "Guidance",
             min_value=1.0,
             max_value=10.0,
             value=2.5,
@@ -156,36 +182,26 @@ with col1:
         )
         
         threshold_level = st.radio(
-            "Acceleration Level",
-            options=["Low", "High"],
+            "Speed",
+            options=["🐢 Low", "🚀 High"],
             index=0,
             horizontal=True,
             help="Higher acceleration means faster generation, but with lower quality."
-
         )
-        # Map threshold level to actual value
-        threshold = 0.9 if threshold_level == "Low" else 1.0
+        threshold = 0.9 if threshold_level == "🐢 Low" else 1.0
         
-        col_w, col_h = st.columns(2)
-        with col_w:
-            width = st.selectbox(
-                "Width",
-                options=[512, 768, 1024],
-                index=2
-            )
-        with col_h:
-            height = st.selectbox(
-                "Height",
-                options=[512, 768, 1024],
-                index=2
-            )
+        size_option = st.selectbox(
+            "Size",
+            options=["512×512", "768×768", "1024×1024"],
+            index=2
+        )
+        size_map = {"512×512": 512, "768×768": 768, "1024×1024": 1024}
+        width = height = size_map[size_option]
     
     # Generate button
-    generate_button = st.button("🚀 Generate Image", type="primary", use_container_width=True)
-
-with col2:
-    # st.header("Output")
+    generate_button = st.button("🚀 Generate", type="primary", use_container_width=True)
     
+    # Handle generation
     if generate_button:
         if image is None:
             st.error("⚠️ Please provide an image first!")
@@ -193,7 +209,7 @@ with col2:
             st.error("⚠️ Please enter a prompt!")
         else:
             try:
-                with st.spinner("🎨 Generating your image... This may take a few seconds."):
+                with st.spinner("🎨 Generating..."):
                     # Convert image to base64
                     image_base64 = image_to_base64(image)
                     
@@ -212,59 +228,86 @@ with col2:
                     # Make API request
                     result = make_request(payload)
                     
-                    # Display results
+                    # Store results in session state
                     if result and 'images' in result and len(result['images']) > 0:
-                        st.success("✅ Image generated successfully!")
-                        
-                        # Display the generated image
-                        output_url = result['images'][0]['url']
-                        st.image(output_url, caption="Generated Image", use_container_width=True)
-                        
-                        # Display metadata
-                        with st.expander("📊 Generation Details"):
-                            st.json({
-                                "request_id": result.get('request_id', 'N/A'),
-                                "total_time": f"{result.get('total_request_time', 0):.2f}s",
-                                "inference_time": f"{result.get('model_inference_time', 0):.2f}s",
-                                "image_url": output_url
-                            })
-                        
-                        # # Download button
-                        # st.markdown("### Download")
-                        # st.markdown(f"[🔗 Open in new tab]({output_url})")
+                        st.session_state.generated_image_url = result['images'][0]['url']
+                        st.session_state.generation_metrics = {
+                            "total_time": result.get('total_request_time', 0),
+                            "inference_time": result.get('model_inference_time', 0),
+                            "request_id": result.get('request_id', 'N/A')
+                        }
+                        st.success("✅ Generated!")
+                        st.rerun()
                     else:
-                        st.error("❌ Failed to generate image. No output received.")
+                        st.error("❌ Generation failed")
                         
             except RequestException as e:
                 st.error(f"❌ API Error: {str(e)}")
             except Exception as e:
                 st.error(f"❌ Error: {str(e)}")
+    
+    
+# MIDDLE COLUMN - Preview
+with col_middle:
+    st.markdown("### 📷 Preview")
+    if image is not None:
+        st.image(image, use_container_width=True)
     else:
-        # st.info("👈 Configure your settings and click 'Generate Image' to start")
-        # Placeholder for output
         st.markdown(
             """
             <div style='
-                border: 2px dashed #ccc;
+                border: 2px dashed #666;
                 border-radius: 10px;
-                padding: 100px 20px;
+                padding: 80px 20px;
                 text-align: center;
-                background-color: #000000;
+                background-color: rgba(255, 255, 255, 0.05);
                 margin: 20px 0;
             '>
-                <p style='font-size: 48px; margin: 0;'>🖼️</p>
-                <p style='color: #666; font-size: 18px; margin-top: 10px;'>Your Generated Image Will Appear Here</p>
+                <p style='font-size: 48px; margin: 0;'>📸</p>
+                <p style='color: #888; font-size: 16px; margin-top: 10px;'>Upload an image</p>
             </div>
             """,
             unsafe_allow_html=True
         )
 
+# RIGHT COLUMN - Generated Image
+with col_right:
+    st.markdown("### 🎨 AI Edited Image")
+    if st.session_state.generated_image_url:
+        st.image(st.session_state.generated_image_url, use_container_width=True)
+        # st.markdown(f"[🔗 Open in new tab]({st.session_state.generated_image_url})")
+    else:
+        st.markdown(
+            """
+            <div style='
+                border: 2px dashed #666;
+                border-radius: 10px;
+                padding: 80px 20px;
+                text-align: center;
+                background-color: rgba(255, 255, 255, 0.05);
+                margin: 20px 0;
+            '>
+                <p style='font-size: 48px; margin: 0;'>🖼️</p>
+                <p style='color: #888; font-size: 16px; margin-top: 10px;'>Generated image</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+    # Display metrics if available
+    if st.session_state.generation_metrics:
+        st.markdown("**⏱️ Metrics**")
+        metrics = st.session_state.generation_metrics
+        st.markdown(f"**Total Time:** {metrics['total_time']:.2f}s")
+        st.markdown(f"**Inference Time:** {metrics['inference_time']:.2f}s")
+
+
 # Footer
-st.markdown("---")
+st.markdown("")
+st.markdown("")
 st.markdown(
     """
-    <div style='text-align: center; color: #666;'>
-        <p>Powered by Flux Kontext | Made with ❤️ by Simplismart</p>
+    <div style='text-align: center; color: #666; padding: 20px;'>
+        <small>Made with ❤️ by Simplismart</small>
     </div>
     """,
     unsafe_allow_html=True
