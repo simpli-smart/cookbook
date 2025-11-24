@@ -2,6 +2,10 @@
 
 A powerful, real-time image editing application built with Streamlit and powered by [Simplismart's optimized Flux.1 Kontext API](https://simplismart.ai/playground). This app demonstrates the capabilities of the FLUX.1 Kontext-dev model, which allows for native image-to-image editing with exceptional character consistency and speed.
 
+
+**For detailed instruction, check out this companion blog**: ADD LINK HERE
+
+
 ![Example](assets/llama-example.png)
 
 ## 🚀 Features
@@ -52,7 +56,9 @@ A powerful, real-time image editing application built with Streamlit and powered
     SIMPLISMART_API_KEY=your_api_key_here
     ```
 
-    > **Note:** You can get your API Key and Endpoint URL by visiting the [Simplismart Playground](https://simplismart.ai/playground), selecting "Flux Kontext" from the model dropdown, and clicking "Get API details".
+    > **Note:** 
+    <br/>You can get Endpoint URL by visiting the [Simplismart Playground](https://simplismart.ai/playground), selecting "Flux Kontext" from the model dropdown, and clicking "Get API details". <br/><br/>
+    You can get API key from [Settings](https://app.simplismart.ai/settings) > API key > Generate New Key
 
 ## 🏃‍♂️ Usage
 
@@ -69,13 +75,6 @@ The app will open in your default web browser at `http://localhost:8501`.
 3.  **Adjust Settings** (Optional): Expand the settings menu to tweak guidance scale or steps.
 4.  **Generate**: Click the "Generate" button and watch the magic happen!
 
-## 📂 Project Structure
-
-- `app.py`: Main Streamlit application code.
-- `requirements.txt`: List of Python dependencies.
-- `.env-template`: Template for environment variables.
-- `assets/`: Contains images and resources for the app.
-- `samples/`: Example images for testing.
 
 ## 🔗 Resources
 
@@ -85,5 +84,16 @@ The app will open in your default web browser at `http://localhost:8501`.
 - [Technical Paper (arXiv)](https://arxiv.org/html/2506.15742v2)
 
 ---
+Attributes:
+
+<a href="https://www.freepik.com/free-vector/all-right-emoji-illustration_151072550.htm#fromView=keyword&page=1&position=0&uuid=4d5fba19-d779-463e-8f45-1a71a2a34fef&query=Smile+emoji+png">Laugh Emoji Image by freepik</a>
+
+
+## 💬 Support
+
+Have questions? [Contact us](https://www.simplismart.ai/contact) or check our [documentation](https://docs.simplismart.ai).
+
+--
 
 Made with ❤️ by [Simplismart](https://simplismart.ai)
+
