@@ -3,7 +3,9 @@
 A powerful, real-time image editing application built with Streamlit and powered by [Simplismart's optimized Flux.1 Kontext API](https://simplismart.ai/playground). This app demonstrates the capabilities of the FLUX.1 Kontext-dev model, which allows for native image-to-image editing with exceptional character consistency and speed.
 
 
-**For detailed instruction, check out this companion blog**: ADD LINK HERE
+**For detailed instruction, check out this companion blog**:  
+[​FLUX.1 Kontext-dev API: 6x faster image-to-image editing with Simplismart](
+https://www.simplismart.ai/blog/flux-1-kontext-dev-api)
 
 
 ![Example](assets/llama-example.png)
