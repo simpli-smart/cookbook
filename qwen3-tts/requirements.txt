@@ -1,0 +1,16 @@
+# Qwen3-TTS Demo Requirements
+# Python 3.10+ recommended
+
+# Web Framework
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# HTTP Client
+requests>=2.31.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Optional: For enhanced audio processing
+# numpy>=1.24.0
+# soundfile>=0.12.0
