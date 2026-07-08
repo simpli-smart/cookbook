@@ -28,7 +28,7 @@ openai==2.6.1
 packaging==25.0
 pandas==2.3.3
 pathlib==1.0.1
-pillow==12.0.0
+pillow==12.1.1
 prov==2.1.1
 puremagic==1.30
 pydantic==2.12.3
